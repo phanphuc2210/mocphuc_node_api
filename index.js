@@ -45,6 +45,10 @@ app.use('/users', userRouter)
 app.use('/status', statusRouter)
 app.use('/payment-method', paymentMethodRouter)
 
+app.get('/', (req, res) => {
+    res.send('<h1>Welcome to API for MộcPhúc. website Angular</h1>')
+})
+
 // upload ảnh
 app.post('/upload' , (req , res)=>{
     console.log(req.files.file)
