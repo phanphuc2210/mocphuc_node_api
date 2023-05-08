@@ -155,7 +155,7 @@ User.forgotPassword = (data, result) => {
             db.query('UPDATE user SET reset_token = ?, reset_token_expires_at = ? WHERE email = ?', [resetToken, resetTokenExpiresAt || null, email]);
     
             // Send an email to the user with the reset link
-            const resetLink = `http://${url}/reset-password?token=${resetToken}`;
+            const resetLink = `${url}/reset-password?token=${resetToken}`;
             const emailBody = `Click on this link to reset your password: ${resetLink}`;
             sendEmail(email, 'Password reset', emailBody);
     
