@@ -77,8 +77,27 @@ Comment.update = (data, result) => {
 }
 
 Comment.analysis = (queryParams, result) => {
-    let from = queryParams.from
-    let to = queryParams.to
+    let conditions = []
+    let condition_query = ''
+
+    if(queryParams != null) {
+        if(queryParams.from) {
+            conditions.push(`c.time >= '${queryParams.from}'`)
+        }
+        if(queryParams.to) {
+            conditions.push(`c.time <= '${queryParams.to}'`)
+        }
+        if(queryParams.typeId) {
+            conditions.push(`p.typeId = ${queryParams.typeId}`)
+        }
+        if(queryParams.woodId) {
+            conditions.push(`p.woodId = ${queryParams.woodId}`)
+        }
+    }
+    
+    if(conditions.length > 0) {
+        condition_query = 'WHERE ' + conditions.join(' AND ')
+    }
 
     let quantity_star = {
         "one_star": 0,
@@ -88,8 +107,10 @@ Comment.analysis = (queryParams, result) => {
         "five_star": 0
     }
 
-    let queryStar = 'SELECT star, COUNT(star) AS quantity FROM comment WHERE time >= ? AND time <= ? GROUP BY star'
-    db.query(queryStar, [from, to], (err, res) => {
+    let queryStar = 'SELECT star, COUNT(star) AS quantity '
+    queryStar += ' FROM comment AS c JOIN product AS p ON c.productId = p.id '
+    queryStar += condition_query + ' GROUP BY star'
+    db.query(queryStar, (err, res) => {
         if(err) {
             console.log(err)
             result({error: "Lỗi khi sửa comment"})

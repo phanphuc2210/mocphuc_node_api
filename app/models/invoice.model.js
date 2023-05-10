@@ -172,10 +172,33 @@ Invoice.updateStatus = (data, result) => {
 }
 
 Invoice.getStatis = (queryParams, result) => {
-    let from = queryParams.from
-    let to = queryParams.to
-    let query = 'SELECT d.productId, SUM(d.quantity_order) as quantity FROM `order` as o JOIN `order_detail` as d ON o.id = d.orderId WHERE o.order_date >= ? AND o.order_date <= ? GROUP BY d.productId ORDER BY d.productId'
-    db.query(query, [from, to],(err, res) => {
+    let conditions = []
+    let condition_query = ''
+
+    if(queryParams != null) {
+        if(queryParams.from) {
+            conditions.push(`o.order_date >= '${queryParams.from}'`)
+        }
+        if(queryParams.to) {
+            conditions.push(`o.order_date <= '${queryParams.to}'`)
+        }
+        if(queryParams.typeId) {
+            conditions.push(`p.typeId = ${queryParams.typeId}`)
+        }
+        if(queryParams.woodId) {
+            conditions.push(`p.woodId = ${queryParams.woodId}`)
+        }
+    }
+    
+    if(conditions.length > 0) {
+        condition_query = 'WHERE ' + conditions.join(' AND ')
+    }
+
+    let query = 'SELECT d.productId, SUM(d.quantity_order) as quantity '
+    query += ' FROM `order` as o JOIN `order_detail` as d ON o.id = d.orderId JOIN product as p ON d.productId = p.id ' 
+    query += condition_query + ' GROUP BY d.productId ORDER BY d.productId'
+
+    db.query(query,(err, res) => {
         if(err) {
             console.log(err)
             result({error: "Lỗi khi truy vấn dữ liệu"})
