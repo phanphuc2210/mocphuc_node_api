@@ -209,30 +209,53 @@ Invoice.getStatis = (queryParams, result) => {
 }
 
 Invoice.analysis = (queryParams, result) => {
-    let from = queryParams.from
-    let to = queryParams.to
+    let conditions = []
+    let condition_query = ''
+
+    if(queryParams != null) {
+        if(queryParams.from) {
+            conditions.push(`o.order_date >= '${queryParams.from}'`)
+        }
+        if(queryParams.to) {
+            conditions.push(`o.order_date <= '${queryParams.to}'`)
+        }
+        if(queryParams.typeId) {
+            conditions.push(`p.typeId = ${queryParams.typeId}`)
+        }
+        if(queryParams.woodId) {
+            conditions.push(`p.woodId = ${queryParams.woodId}`)
+        }
+    }
+    
+    if(conditions.length > 0) {
+        condition_query = 'WHERE ' + conditions.join(' AND ')
+    }
 
     let quantityCustomer = 0
     let quantityProduct = 0
     let quantityOrder = 0
 
     let query = 'SELECT * FROM order_detail AS od '
-    query += 'JOIN `order` AS o ON od.orderId = o.id '
-    query += 'WHERE o.order_date >= ? AND o.order_date <= ? '
-    query += 'GROUP BY o.email'
+    query += 'JOIN `order` AS o ON od.orderId = o.id JOIN product AS p ON od.productId = p.id '
+    query += condition_query
+    query += ' GROUP BY o.email'
 
     let queryTotalProduct = 'SELECT od.productId, SUM(od.quantity_order) as quantity '
-    queryTotalProduct += 'FROM order_detail AS od JOIN `order` AS o ON od.orderId = o.id '
-    queryTotalProduct += 'WHERE o.order_date >= ? AND o.order_date <= ? '
-    queryTotalProduct += 'GROUP BY od.productId;'
+    queryTotalProduct += 'FROM order_detail AS od JOIN `order` AS o ON od.orderId = o.id JOIN product AS p ON od.productId = p.id '
+    queryTotalProduct += condition_query
+    queryTotalProduct += ' GROUP BY od.productId;'
 
-    db.query(query,[from, to],(err, res) => {
+    let queryTotalOrder = 'SELECT * '
+    queryTotalOrder += 'FROM `order` AS o JOIN order_detail AS od ON od.orderId = o.id JOIN product AS p ON od.productId = p.id '
+    queryTotalOrder += condition_query
+
+    db.query(query,(err, res) => {
         if(err) {
             console.log(err)
             result({error: "Lỗi khi truy vấn dữ liệu"})
         } else {
             quantityCustomer = res.length
-            db.query(queryTotalProduct, [from, to], (err, res) => {
+            db.query(queryTotalProduct, (err, res) => {
                 if(err) {
                     console.log(err)
                     result({error: "Lỗi khi truy vấn dữ liệu"})
@@ -243,7 +266,7 @@ Invoice.analysis = (queryParams, result) => {
                         })
                     }
 
-                    db.query('SELECT * FROM `order` WHERE order_date >= ? AND order_date <= ?', [from, to], (err, res) => {
+                    db.query(queryTotalOrder, (err, res) => {
                         if(err) {
                             console.log(err)
                             result({error: "Lỗi khi truy vấn dữ liệu"})
