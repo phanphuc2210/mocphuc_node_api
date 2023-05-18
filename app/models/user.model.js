@@ -157,10 +157,41 @@ User.forgotPassword = (data, result) => {
             // Send an email to the user with the reset link
             const resetLink = `${url}/reset-password?token=${resetToken}`;
             const emailBody = `Click on this link to reset your password: ${resetLink}`;
-            sendEmail(email, 'Password reset', emailBody);
-    
-            // Return a success response
-            result({ message: 'Reset email được gửi thành công. Vui lòng kiểm tra email!' });
+
+            // send mail
+            // create reusable transporter object using the default SMTP transport
+            let transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: 'mocphuc2210@gmail.com', 
+                    pass: 'oikfxuwevzikbdnc'
+                },
+                tls: {
+                    // do not fail on invalid certs
+                    rejectUnauthorized: false
+                }
+            });
+        
+            const mainOptions = { // thiết lập đối tượng, nội dung gửi mail
+            from: '"MộcPhúc" <mocphuc2210@gmail.com>', // sender address
+            to: email, // list of receivers
+            subject: 'Password reset', // Subject line
+            text: emailBody, // plain text body
+            html: `<p>${emailBody}</p>`, // html body
+            };
+
+            transporter.sendMail(mainOptions, function(err, info){
+                if (err) {
+                    console.log(err);
+                    result({error: "Lỗi khi gửi email"});
+                } else {
+                    console.log('Message sent: ' +  info.response);
+                    // Return a success response
+                    result({ message: 'Reset email được gửi thành công. Vui lòng kiểm tra email!' });
+                }
+            });
         }
     })
 }
@@ -188,39 +219,5 @@ User.resetPassword = (data, result) => {
         }
     });
 }
-
-function sendEmail(to, subject, body) {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'mocphuc2210@gmail.com', 
-            pass: 'oikfxuwevzikbdnc'
-        },
-        tls: {
-            // do not fail on invalid certs
-            rejectUnauthorized: false
-        }
-    });
-  
-    const mainOptions = { // thiết lập đối tượng, nội dung gửi mail
-      from: '"MộcPhúc" <mocphuc2210@gmail.com>', // sender address
-      to: to, // list of receivers
-      subject: subject, // Subject line
-      text: body, // plain text body
-      html: `<p>${body}</p>`, // html body
-    };
-
-    transporter.sendMail(mainOptions, function(err, info){
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('Message sent: ' +  info.response);
-        }
-    });
-  }
-
 
 module.exports = User
