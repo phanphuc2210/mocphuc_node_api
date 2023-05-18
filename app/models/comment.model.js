@@ -24,7 +24,8 @@ Comment.getAllByProductId= (productId, result) => {
 Comment.getAll = (result) => {
     let query = 'SELECT c.message, c.image, c.star, CONCAT(u.lastname, " ",u.firstname) as username, image.url as image_product, p.slug '
     query += 'FROM comment as c JOIN user as u ON c.userId = u.id '
-    query += 'JOIN image ON c.productId = image.productId JOIN product AS p ON p.id = c.productId'
+    query += 'JOIN image ON c.productId = image.productId JOIN product AS p ON p.id = c.productId '
+    query += 'GROUP BY c.userId, c.productId'
     db.query(query, (err, res) => {
         if(err) {
             console.log(err)

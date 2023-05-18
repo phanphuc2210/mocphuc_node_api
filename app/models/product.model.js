@@ -54,9 +54,9 @@ Product.getAll= (queryParams, result) => {
         filter_query = 'WHERE ' + filters.join(' AND ')
     }
     
-    let query = 'SELECT a.id, a.name, a.typeId, a.quantity, a.price, a.description, a.slug,b.name AS type_name, image.url as image, COUNT(c.userId) as amountComment, ROUND(AVG(c.star)) as starTotal '
+    let query = 'SELECT a.id, a.name, a.typeId, a.quantity, a.price, a.description, a.slug,b.name AS type_name, (SELECT url FROM image WHERE productId = a.id LIMIT 1) as image, COUNT(c.userId) as amountComment, ROUND(AVG(c.star)) as starTotal '
     query += ' ,(SELECT COUNT(productId) FROM order_detail WHERE productId = a.id) AS sold '
-    query += 'FROM product AS a JOIN type AS b ON a.typeId = b.id JOIN image ON a.id = image.productId LEFT JOIN comment AS c ON a.id = c.productId ' + join
+    query += 'FROM product AS a JOIN type AS b ON a.typeId = b.id LEFT JOIN comment AS c ON a.id = c.productId ' + join
     query += filter_query + ' GROUP by a.id ' + order + limit
     db.query(query , (err, res) => {
         if(err) {
