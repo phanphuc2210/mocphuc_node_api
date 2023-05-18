@@ -81,27 +81,17 @@ exports.vnpayIPN = (req, res, next) => {
     var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
 
     if(secureHash === signed){
-       db.query('SELECT * FROM `order` WHERE id = ?', orderId, (err, response) => {
-            if(response.length > 0) {
-                if(response[0].status === statusCode.Da_Dat_Hang) {
-                    if(rspCode=="00") {
-                        res.send({rspCode: '00', orderId,message: 'Thanh toán thành công!'})
-                    } else {
-                        Invoice.updateStatus({nextStatus: statusCode.Thanh_Toan_That_Bai, orderId}, (response) => {
-                            if(response.error) {
-                                res.status(400).send({message: response.error})
-                            } else {
-                                res.send({rspCode: rspCode, orderId,message: 'Thanh toán thất bại!'})
-                            }
-                        })
-                    }
+        if(rspCode=="00") {
+            res.send({rspCode: '00', orderId,message: 'Thanh toán thành công!'})
+        } else {
+            Invoice.updateStatus({nextStatus: statusCode.Thanh_Toan_That_Bai, orderId}, (response) => {
+                if(response.error) {
+                    res.status(400).send({message: response.error})
                 } else {
-                    res.send({rspCode: '02', orderId,message: 'Hóa đơn này đã được cập nhật trạng thái!'})
+                    res.send({rspCode: rspCode, orderId,message: 'Thanh toán thất bại!'})
                 }
-            } else {
-                res.send({rspCode: '01', message: 'Không tìm thấy hóa đơn!'})
-            }
-       })
+            })
+        }
     }
     else {
         res.send({rspCode: '97', message: 'Fail checksum'})
