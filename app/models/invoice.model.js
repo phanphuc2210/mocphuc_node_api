@@ -96,7 +96,7 @@ Invoice.getInvoiceList = (userId, queryParams, result) => {
             filter_query = 'WHERE ' + filters.join(' AND ')
         }
     }
-    queryStr = 'SELECT o.id,o.order_date,o.address,o.phone,m.name AS payment_method,s.name AS status_name, o.status FROM `order` AS o JOIN `status` AS s ON o.status = s.id JOIN `payment_method` as m ON o.payment_method = m.id '+ filter_query +' ORDER BY id DESC'
+    queryStr = 'SELECT o.id,o.order_date,o.address,o.phone,m.name AS payment_method,s.name AS status_name, o.status FROM `order` AS o JOIN `status` AS s ON o.status = s.id JOIN `payment_method` as m ON o.payment_method = m.id '+ filter_query +' ORDER BY o.id DESC'
     
     db.query(queryStr, userId, (err, res) => {
         if(err) {
