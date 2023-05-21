@@ -9,9 +9,9 @@ var mysql = require('mysql')
 
 var connection = mysql.createConnection({
     host: 'sql12.freesqldatabase.com',
-    user: 'sql12618206',
-    password: '6cdCD4W8JK',
-    database: 'sql12618206',
+    user: 'sql12619889',
+    password: 'amlqvRpnBL',
+    database: 'sql12619889',
     port: 3306
 })
 
