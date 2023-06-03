@@ -12,7 +12,8 @@ exports.list = (req, res) => {
 }
 
 exports.all = (req, res) => {
-    Comment.getAll((response) => {
+    var query = req.query
+    Comment.getAll(query, (response) => {
         if(response.error) {
             res.status(400).send({message: response.error})
         } else {

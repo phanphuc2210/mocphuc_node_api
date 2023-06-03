@@ -21,11 +21,33 @@ Comment.getAllByProductId= (productId, result) => {
     })
 }
 
-Comment.getAll = (result) => {
-    let query = 'SELECT c.message, c.image, c.star, CONCAT(u.lastname, " ",u.firstname) as username, image.url as image_product, p.slug '
+Comment.getAll = (queryParams, result) => {
+    let conditions = []
+    let condition_query = ''
+
+    if(queryParams != null) {
+        if(queryParams.from) {
+            conditions.push(`c.time >= '${queryParams.from}'`)
+        }
+        if(queryParams.to) {
+            conditions.push(`c.time <= '${queryParams.to}'`)
+        }
+        if(queryParams.typeId) {
+            conditions.push(`p.typeId = ${queryParams.typeId}`)
+        }
+        if(queryParams.woodId) {
+            conditions.push(`p.woodId = ${queryParams.woodId}`)
+        }
+    }
+    
+    if(conditions.length > 0) {
+        condition_query = 'WHERE ' + conditions.join(' AND ')
+    }
+
+    let query = 'SELECT c.message, c.image, c.time, c.star, CONCAT(u.lastname, " ",u.firstname) as username, image.url as image_product, p.name as product_name, p.slug, u.avatar '
     query += 'FROM comment as c JOIN user as u ON c.userId = u.id '
     query += 'JOIN image ON c.productId = image.productId JOIN product AS p ON p.id = c.productId '
-    query += 'GROUP BY c.userId, c.productId'
+    query += condition_query + ' GROUP BY c.userId, c.productId'
     db.query(query, (err, res) => {
         if(err) {
             console.log(err)
