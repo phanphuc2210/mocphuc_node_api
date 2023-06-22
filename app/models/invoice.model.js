@@ -164,7 +164,22 @@ Invoice.updateStatus = (data, result) => {
                     console.log(err)
                     result({error: "Lỗi khi cập nhật status tracking"})
                 } else {
-                    result({message: "Cập nhật trạng thái mới thành công"})
+                    if(data.nextStatus === statusCode.Da_Xac_Nhan) {
+                        db.query('SELECT * FROM `order_detail` WHERE orderId = ?', data.orderId, (err, res) => {
+                            res.forEach(o => {
+                                db.query('UPDATE product SET quantity = quantity - ? WHERE id = ?', [o.quantity_order, o.productId], (err, res) => {
+                                    if(err) {
+                                        console.log(err)
+                                        result({error: "Lỗi khi cập nhật số lượng sản phẩm"})
+                                    } else {
+                                        result({message: "Cập nhật trạng thái mới thành công"})
+                                    }
+                                })
+                            });
+                        })
+                    } else {
+                        result({message: "Cập nhật trạng thái mới thành công"})
+                    }
                 }
             })
         }

@@ -83,9 +83,7 @@ Cart.payment = (data, result) => {
                     if(err) {
                         console.log(err)
                         result({error: "Lỗi khi thêm 1 chi tiết hóa đơn"})
-                    } else {
-                        db.query('UPDATE product SET quantity = quantity - ? WHERE id = ?', [o.quantity, o.productId])
-                    }
+                    } 
                 })
             });
             db.query('UPDATE voucher SET quantity = quantity - 1 WHERE code = ?', order.code)
